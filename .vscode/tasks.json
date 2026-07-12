@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "composer install",
+            "type": "shell",
+            "command": "composer install",
+            "problemMatcher": [],
+            "group": { "kind": "build", "isDefault": true }
+        },
+        {
+            "label": "composer test",
+            "type": "shell",
+            "command": "composer test",
+            "problemMatcher": [],
+            "group": "test"
+        }
+    ]
+}

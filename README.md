@@ -63,6 +63,32 @@ last polled queue item per data type is cached on the client instance and used b
 `acceptQueueData()`; in a web application poll and accept within the same request, or track the
 queue item ids yourself via `getLastQueueItemId()`.
 
+## Getting started sample
+
+[examples/getting-started.php](examples/getting-started.php) is a small console application that
+exercises the whole workflow against a live Data Connector — use it as a template for your own
+scoring program:
+
+```
+composer install
+php examples/getting-started.php               # interactive menu
+php examples/getting-started.php --scenario    # unattended full flow
+```
+
+Mind that **"Initialize event" starts Bridgemate Control Software** and creates a small test
+event (1 section, 2 tables, 3 rounds, 8 players). The poll queues only carry data once BCS
+produces it: enter a result in BCS (or on a Bridgemate) and then poll for results here. The
+sample prints every request and response envelope (wire trace, toggleable), which is the fastest
+way to learn the protocol.
+
+### Debugging in Visual Studio Code
+
+Open this folder in VS Code and install the recommended extensions (Intelephense + PHP Debug,
+suggested automatically). With PHP and [Xdebug](https://xdebug.org/docs/install) installed,
+press <kbd>F5</kbd> — launch configurations for the sample and for PHPUnit are provided in
+`.vscode/launch.json`. Set a breakpoint in `src/DataConnectorClient.php::sendRequest()` to watch
+every envelope being built and sent.
+
 ## Documentation
 
 The protocol, the procedures (initializing an event, updating movements, the queues) and all DTOs
