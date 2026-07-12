@@ -1,5 +1,8 @@
 # Bridgemate Data Connector scoring program client for PHP
 
+[![Packagist](https://img.shields.io/packagist/v/bridgemate/dataconnector-client)](https://packagist.org/packages/bridgemate/dataconnector-client)
+[![CI](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-PHP/actions/workflows/ci.yml/badge.svg)](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-PHP/actions/workflows/ci.yml)
+
 PHP client for scoring programs to communicate with the **Bridgemate Data Connector** over http.
 Bridgemate Control Software (BCS 5) is needed to receive, process and return data from the Data
 Connector. This package is the PHP counterpart of the
