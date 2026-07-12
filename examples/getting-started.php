@@ -36,6 +36,9 @@ const STATE_FILE = __DIR__ . '/.state.json';
 // Setup
 //----------------------------------------------------------------------------------------------
 
+echo '=== Bridgemate Data Connector getting-started sample - PHP client ===' . PHP_EOL;
+echo 'Running on PHP ' . PHP_VERSION . ' (' . PHP_OS_FAMILY . ')' . PHP_EOL;
+
 $options = getopt('', ['scenario', 'base-address:', 'club-id:', 'licence-key:', 'no-trace']);
 $trace = new EchoTransport(new CurlTransport());
 $trace->enabled = !isset($options['no-trace']);
