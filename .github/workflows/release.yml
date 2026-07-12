@@ -1,0 +1,27 @@
+name: Release
+
+# Creates the git tag and GitHub release for a new version. Packagist picks the tag up through
+# its GitHub integration; there is nothing to build or upload for a Composer package.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (semver, without the v prefix), e.g. 1.0.0'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ inputs.version }}" \
+            --target "${{ github.sha }}" \
+            --title "v${{ inputs.version }}" \
+            --generate-notes

@@ -1,0 +1,35 @@
+{
+    "name": "bridgemate/dataconnector-client",
+    "description": "Scoring program client for the Bridgemate Data Connector over http. Communicate with Bridgemate Control Software (BCS 5) from a bridge scoring program written in PHP.",
+    "type": "library",
+    "license": "LGPL-3.0-only",
+    "keywords": ["bridgemate", "bridge", "data-connector", "scoring", "bcs"],
+    "homepage": "https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-PHP",
+    "authors": [
+        {
+            "name": "Bridge Systems BV",
+            "homepage": "https://www.bridgemate.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bridgemate\\DataConnector\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bridgemate\\DataConnector\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
