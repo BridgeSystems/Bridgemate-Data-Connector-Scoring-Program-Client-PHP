@@ -139,8 +139,9 @@ function pollQueue(DataConnectorClient $client, DataConnectorResponseData $dataT
         default => [],
     };
     echo "Polled {$dataType->name}: " . count($items) . ' item(s)' . PHP_EOL;
-    foreach ($items as $item) {
-        echo '  ' . json_encode($item) . PHP_EOL;
+    foreach ($items as $index => $item) {
+        echo '  #' . ($index + 1) . PHP_EOL;
+        echo indent(indent((string)json_encode($item, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))) . PHP_EOL;
     }
     if ($items !== []) {
         echo "Last queue item id: {$client->getLastQueueItemId($dataType)} — use 'accept' so they are not sent again." . PHP_EOL;
