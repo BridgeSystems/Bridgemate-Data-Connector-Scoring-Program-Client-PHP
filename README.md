@@ -128,8 +128,9 @@ composer test
 
 The same client exists for
 [.NET](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client) (the
-reference implementation, including the scoring program emulator) and
-[Java](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-Java).
+reference implementation, including the scoring program emulator),
+[Java](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-Java) and
+[Python](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-Python).
 Questions are welcome in the
 [Discussions](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client/discussions)
 of the main repository; see [SUPPORT.md](SUPPORT.md).
