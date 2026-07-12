@@ -89,7 +89,9 @@ function continueEvent(DataConnectorClient $client): ScoringProgramResponse
 {
     $continueDto = new ContinueDTO();
     $continueDto->EventGuid = state()['eventGuid'];
-    $continueDto->Commands = 7;
+    //Unlike InitDTO, ContinueDTO must not carry the Reset flag (2): only start BCS (1),
+    //start reading (4) and optionally clear data (128), minimize, auto-shutdown or debug logging.
+    $continueDto->Commands = 5;
     return $client->continueEvent($continueDto);
 }
 
@@ -230,13 +232,29 @@ while (true) {
 
 function report(string $action, ScoringProgramResponse $response): void
 {
-    printf(
-        "%s -> DataType=%s ErrorType=%s Data=%s" . PHP_EOL,
-        $action,
-        $response->DataType->name,
-        $response->ErrorType->name,
-        substr((string)json_encode(json_decode($response->SerializedData ?? 'null')), 0, 120),
-    );
+    printf("%s -> DataType=%s ErrorType=%s" . PHP_EOL, $action, $response->DataType->name, $response->ErrorType->name);
+    echo indent(prettyData($response->SerializedData)) . PHP_EOL;
+}
+
+/**
+ * Renders the (JSON string) payload of a response in full, pretty-printed. \r\n sequences
+ * inside message strings become real line breaks so validation messages read naturally.
+ */
+function prettyData(?string $serializedData): string
+{
+    if ($serializedData === null || trim($serializedData) === '') {
+        return '(no data)';
+    }
+    $decoded = json_decode($serializedData);
+    if (is_string($decoded)) {
+        return str_replace(["\r\n", "\r"], "\n", $decoded);
+    }
+    return (string)json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+}
+
+function indent(string $text): string
+{
+    return '  ' . str_replace("\n", "\n  ", $text);
 }
 
 function newGuid(): string
