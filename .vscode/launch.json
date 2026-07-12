@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Getting started (interactive)",
+            "name": "PHP: getting started (interactive)",
             "type": "php",
             "request": "launch",
             "program": "${workspaceFolder}/examples/getting-started.php",
@@ -14,7 +14,7 @@
             ]
         },
         {
-            "name": "Getting started (--scenario)",
+            "name": "PHP: getting started (--scenario)",
             "type": "php",
             "request": "launch",
             "program": "${workspaceFolder}/examples/getting-started.php",
@@ -26,7 +26,7 @@
             ]
         },
         {
-            "name": "PHPUnit tests",
+            "name": "PHP: PHPUnit tests",
             "type": "php",
             "request": "launch",
             "program": "${workspaceFolder}/vendor/phpunit/phpunit/phpunit",
@@ -37,7 +37,7 @@
             ]
         },
         {
-            "name": "Listen for Xdebug",
+            "name": "PHP: listen for Xdebug",
             "type": "php",
             "request": "launch",
             "port": 9003
