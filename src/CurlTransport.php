@@ -37,6 +37,9 @@ final class CurlTransport implements HttpTransport
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_CONNECTTIMEOUT => $this->connectTimeoutSeconds,
                 CURLOPT_TIMEOUT => $this->timeoutSeconds,
+                // The data connector lives on localhost or the LAN: a proxy from the http_proxy
+                // environment variables would hijack the request (503), so disable any proxy.
+                CURLOPT_PROXY => '',
             ]);
             if ($jsonBody !== null) {
                 curl_setopt_array($handle, [
