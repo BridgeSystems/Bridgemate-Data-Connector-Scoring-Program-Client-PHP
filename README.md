@@ -99,6 +99,24 @@ are described in the
 [Bridgemate Data Connector developer's guide](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client/blob/master/Documentation/MD/index.md).
 The DTO classes in `src/Dto` carry the same names and property names as the guide.
 
+## Validation
+
+`Bridgemate\DataConnector\Validation\DtoValidator` ports the `Validate()` methods of the .NET
+client, one static method per DTO (`DtoValidator::validateInitDTO($dto)`,
+`validateResultDTO($dto)`, ...). Each method fills the DTO's `ValidationMessages` property and
+returns `true` when the DTO is valid. Validate before you send: client-side validation is
+advisory and lets you reject bad data with a precise message before it leaves your program, but
+the Data Connector service re-validates authoritatively and returns a response with `ErrorType`
+`Validation` when it rejects a payload.
+
+Note on explicit seatings: a `ParticipationDTO` may only carry a `RoundNumber` above one for a
+section that was created with `HasExplicitParticipations` set — for all other sections BCS
+calculates the seating for later rounds from the movement.
+
+The validators are hand-written parity ports of the C# originals: their boolean results and
+message texts (including order) are asserted against generated golden fixtures in
+`tests/fixtures/validation`, produced by the .NET client itself.
+
 ## Scope
 
 This first release covers the core workflow: `connect`/`ping`, `initialize`, `continueEvent`,
