@@ -14,8 +14,9 @@ namespace Bridgemate\DataConnector\Dto;
  * seating for every round explicitly, one DTO per (table, round, position). This requires the section
  * to have been created with HasExplicitParticipations set to true. BCS then stores each participation
  * for its own round exactly as sent and does not calculate seatings from the movement. Use this for
- * individual sessions and other formats where partnerships change between rounds. The combination of
- * both playernumber and name details is not supported.
+ * individual sessions and other formats where partnerships change between rounds. 4. To report that a
+ * seat was emptied (IsRemoval): the player who sat there was removed. Such a DTO carries no player
+ * number and no name. The combination of both playernumber and name details is not supported.
  */
 class ParticipationDTO implements \JsonSerializable
 {
@@ -65,6 +66,16 @@ class ParticipationDTO implements \JsonSerializable
     public bool $IsPlayerSwap = false;
 
     /**
+     * Signals that the player who sat at this seat was removed and the seat is now empty. The DTO then
+     * carries no player: PlayerNumber, FirstName, LastName and CountryCode must be empty. The seat is
+     * identified by the session, section, table, direction and round, with the same rules as any
+     * participation: round zero or one means the first round, in a section without explicit
+     * participations the player leaves the pair (every round), in a section with explicit
+     * participations only the given round is emptied.
+     */
+    public bool $IsRemoval = false;
+
+    /**
      * Optional, must only be used when the playernumber is empty.
      */
     public ?string $FirstName = null;
@@ -98,6 +109,7 @@ class ParticipationDTO implements \JsonSerializable
             'RoundNumber' => $this->RoundNumber,
             'PlayerNumber' => $this->PlayerNumber,
             'IsPlayerSwap' => $this->IsPlayerSwap,
+            'IsRemoval' => $this->IsRemoval,
             'FirstName' => $this->FirstName,
             'LastName' => $this->LastName,
             'CountryCode' => $this->CountryCode,
@@ -118,6 +130,7 @@ class ParticipationDTO implements \JsonSerializable
         $dto->RoundNumber = $data['RoundNumber'] ?? 0;
         $dto->PlayerNumber = $data['PlayerNumber'] ?? null;
         $dto->IsPlayerSwap = $data['IsPlayerSwap'] ?? false;
+        $dto->IsRemoval = $data['IsRemoval'] ?? false;
         $dto->FirstName = $data['FirstName'] ?? null;
         $dto->LastName = $data['LastName'] ?? null;
         $dto->CountryCode = $data['CountryCode'] ?? null;

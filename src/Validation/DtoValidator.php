@@ -80,6 +80,18 @@ final class DtoValidator
         if ($dto->RoundNumber < 0) {
             $messages[] = "Invalid RoundNumber ({$dto->RoundNumber}). The value cannot be negative.";
         }
+        if ($dto->IsRemoval) {
+            // A removal empties the seat, so it carries no player at all.
+            if (!self::isBlank($dto->PlayerNumber) || !self::isBlank($dto->FirstName)
+                || !self::isBlank($dto->LastName) || !self::isBlank($dto->CountryCode)) {
+                $messages[] = 'A removal (IsRemoval) must not specify a PlayerNumber, FirstName, LastName or CountryCode.';
+            }
+            if ($dto->IsPlayerSwap) {
+                $messages[] = 'A participation cannot be both a removal (IsRemoval) and a player swap (IsPlayerSwap).';
+            }
+            $dto->ValidationMessages = $messages;
+            return $messages === [];
+        }
         if (self::isBlank($dto->LastName) && self::isBlank($dto->PlayerNumber)) {
             $messages[] = 'Either the LastName or the PlayerNumber must be specified.';
         }
@@ -898,6 +910,9 @@ final class DtoValidator
      */
     private static function participationToString(ParticipationDTO $dto): string
     {
+        if ($dto->IsRemoval) {
+            return "REMOVE {$dto->SectionLetters}{$dto->TableNumber} {$dto->Direction->name} round {$dto->RoundNumber}";
+        }
         $swap = $dto->IsPlayerSwap ? 'SWAP ' : '';
         return "{$swap}{$dto->SectionLetters}{$dto->TableNumber} {$dto->Direction->name} round {$dto->RoundNumber}: " .
                ($dto->PlayerNumber ?? '') . ' ' . ($dto->FirstName ?? '') . ' ' . ($dto->LastName ?? '');
