@@ -49,6 +49,17 @@ class DataConnectorClient
      */
     public const API_PING_RESPONSE = 'Bridgemate dataconnector service version';
 
+    /**
+     * The registry key where the Data Connector service of the current Windows user publishes its http
+     * port (value HttpPort) and its own process id (value HttpProcessId).
+     */
+    public const PUBLICATION_REGISTRY_KEY = 'HKCU\Software\Bridge Systems BV\BridgemateDataConnector';
+
+    /**
+     * The process name of the Data Connector service (its executable without the extension).
+     */
+    public const DATA_CONNECTOR_PROCESS_NAME = 'BridgeSystems.Bridgemate.DataConnectorService';
+
     private readonly HttpTransport $transport;
     private readonly string $baseAddress;
 
@@ -97,21 +108,59 @@ class DataConnectorClient
     /**
      * The url of the Data Connector on the local computer. On Windows the Data Connector service
      * publishes the port it listens on in the registry (HKEY_CURRENT_USER\Software\Bridge Systems BV\
-     * BridgemateDataConnector, value HttpPort); when nothing is published the default port 5079 is
-     * assumed.
+     * BridgemateDataConnector, value HttpPort); when nothing is published, or the Data Connector that
+     * published it no longer runs, the default port 5079 is assumed.
      */
     public static function discoverLocalBaseAddress(): string
     {
         if (PHP_OS_FAMILY === 'Windows' && function_exists('shell_exec')) {
-            $output = @shell_exec('reg query "HKCU\Software\Bridge Systems BV\BridgemateDataConnector" /v HttpPort 2>nul');
-            if (is_string($output) && preg_match('/HttpPort\s+REG_DWORD\s+0x([0-9A-Fa-f]+)/', $output, $matches)) {
-                $port = (int)hexdec($matches[1]);
-                if ($port > 0 && $port <= 65535) {
+            $output = @shell_exec('reg query "' . self::PUBLICATION_REGISTRY_KEY . '" 2>nul');
+            if (is_string($output)) {
+                $port = self::publishedPort($output, fn (int $processId): bool => self::isDataConnectorRunning($processId));
+                if ($port !== null) {
                     return 'http://localhost:' . $port;
                 }
             }
         }
         return 'http://localhost:' . self::DEFAULT_PORT;
+    }
+
+    /**
+     * The port published in the output of "reg query" on the publication key, or null when none is
+     * published or the Data Connector that published it (value HttpProcessId) no longer runs: a Data
+     * Connector that was killed, for instance by the Data Connector of an old installation, leaves its
+     * values behind. Values without a process id come from Data Connectors that predate it; they are
+     * trusted.
+     *
+     * @param callable(int): bool $isRunning Tells whether the Data Connector with the given process id runs.
+     * @internal Public for the tests.
+     */
+    public static function publishedPort(string $regQueryOutput, callable $isRunning): ?int
+    {
+        if (!preg_match('/HttpPort\s+REG_DWORD\s+0x([0-9A-Fa-f]+)/', $regQueryOutput, $portMatch)) {
+            return null;
+        }
+        $port = (int)hexdec($portMatch[1]);
+        if ($port <= 0 || $port > 65535) {
+            return null;
+        }
+        if (preg_match('/HttpProcessId\s+REG_DWORD\s+0x([0-9A-Fa-f]+)/', $regQueryOutput, $processIdMatch)
+            && !$isRunning((int)hexdec($processIdMatch[1]))) {
+            return null;
+        }
+        return $port;
+    }
+
+    private static function isDataConnectorRunning(int $processId): bool
+    {
+        $output = @shell_exec('tasklist /FI "PID eq ' . $processId . '" /FO CSV /NH 2>nul');
+        if (!is_string($output)) {
+            //Cannot tell: trust the publication, as before.
+            return true;
+        }
+        //Matching the image name rather than tasklist's (localised) "no tasks" message also guards
+        //against the process id having been reused by an unrelated process.
+        return stripos($output, '"' . self::DATA_CONNECTOR_PROCESS_NAME . '.exe"') !== false;
     }
 
     /**
