@@ -154,6 +154,46 @@ final class DataConnectorClientTest extends TestCase
         new DataConnectorClient('c', 'l', 'ftp://example.com');
     }
 
+    private const REG_QUERY_HEADER = "\r\nHKEY_CURRENT_USER\\Software\\Bridge Systems BV\\BridgemateDataConnector\r\n";
+
+    public function testPublishedPortWithoutProcessIdIsTrusted(): void
+    {
+        $output = self::REG_QUERY_HEADER
+            . "    HttpPort    REG_DWORD    0x13d8\r\n"
+            . "    HttpBinding    REG_SZ    local\r\n";
+        $port = DataConnectorClient::publishedPort($output, fn (int $processId): bool => self::fail('Not expected to be asked.'));
+        self::assertSame(5080, $port);
+    }
+
+    public function testPublishedPortOfARunningDataConnectorIsUsed(): void
+    {
+        $output = self::REG_QUERY_HEADER
+            . "    HttpPort    REG_DWORD    0x13d8\r\n"
+            . "    HttpBinding    REG_SZ    local\r\n"
+            . "    HttpProcessId    REG_DWORD    0x3e8\r\n";
+        $asked = [];
+        $port = DataConnectorClient::publishedPort($output, function (int $processId) use (&$asked): bool {
+            $asked[] = $processId;
+            return true;
+        });
+        self::assertSame(5080, $port);
+        self::assertSame([1000], $asked);
+    }
+
+    public function testPublishedPortOfADataConnectorThatNoLongerRunsIsIgnored(): void
+    {
+        $output = self::REG_QUERY_HEADER
+            . "    HttpPort    REG_DWORD    0x13d8\r\n"
+            . "    HttpProcessId    REG_DWORD    0x3e8\r\n";
+        self::assertNull(DataConnectorClient::publishedPort($output, fn (int $processId): bool => false));
+    }
+
+    public function testOnlyAPortPreferenceIsNotAPublishedPort(): void
+    {
+        $output = self::REG_QUERY_HEADER . "    HttpPortPreference    REG_DWORD    0x13d7\r\n";
+        self::assertNull(DataConnectorClient::publishedPort($output, fn (int $processId): bool => true));
+    }
+
     private function okResponseJson(ScoringProgramDataConnectorCommands $command): string
     {
         return json_encode([
